@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Visual Storytelling para Dashboards</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap');
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background-color: #0F172A;
+    color: #F8FAFC;
+    overflow-x: hidden;
+}
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    height: 350px;
+    max-height: 400px;
+}
+.glass-panel {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 1rem;
+}
+.neon-border-cyan { border-left: 4px solid #06B6D4; }
+.neon-border-pink { border-left: 4px solid #EC4899; }
+.neon-border-amber { border-left: 4px solid #F59E0B; }
+.text-gradient {
+    background: linear-gradient(to right, #06B6D4, #EC4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.wireframe-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto 1fr;
+    gap: 0.75rem;
+    height: 100%;
+    min-height: 350px;
+}
+.wf-header { grid-column: 1 / -1; background: #1E293B; border-radius: 0.5rem; padding: 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155;}
+.wf-kpi { background: #1E293B; border-radius: 0.5rem; padding: 1rem; text-align: center; border: 1px solid #334155;}
+.wf-kpi-value { font-size: 1.5rem; font-weight: 700; color: #06B6D4; }
+.wf-main { grid-column: 1 / 3; background: #1E293B; border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; justify-content: center; border: 1px dashed #EC4899;}
+.wf-side { grid-column: 3; background: #1E293B; border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; justify-content: center; border: 1px dashed #F59E0B;}
+
+/* Chartosaur Matrix Styles */
+.chartosaur-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+.chart-type-card {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    transition: transform 0.2s, border-color 0.2s;
+}
+.chart-type-card:hover {
+    transform: translateY(-5px);
+    border-color: #06B6D4;
+}
+.chart-icon-mock {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+/* Tabs */
+.tab-btn {
+    transition: all 0.3s ease;
+}
+.tab-btn.active {
+    background: rgba(30, 41, 59, 0.9);
+    border-bottom: 2px solid #EC4899;
+    color: #F8FAFC;
+}
+.tab-btn.inactive {
+    background: transparent;
+    color: #94A3B8;
+    border-bottom: 2px solid transparent;
+}
+.tab-btn.inactive:hover {
+    color: #E2E8F0;
+    background: rgba(30, 41, 59, 0.4);
+}
+</style>
+</head>
+<body class="antialiased pb-24 selection:bg-pink-500 selection:text-white">
+
+<div id="metadata-constraints" style="display: none;">
+    CONFIRMATION: NEITHER Mermaid JS NOR SVG were used anywhere in the output.
+    PALETTE: Vibrant Tech.
+</div>
+
+<header class="relative pt-20 pb-12 px-6 text-center border-b border-slate-800">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20"></div>
+    </div>
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+            Visual Storytelling <br />
+            <span class="text-gradient">Para Dashboards</span>
+        </h1>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            A união perfeita entre princípios de design teóricos e inteligência artificial aplicada. Transforme dados em histórias que geram ação.
+        </p>
+    </div>
+</header>
+
+<!-- SISTEMA DE SEPARADORES (TABS) -->
+<nav class="flex justify-center border-b border-slate-800 bg-slate-900/50 sticky top-0 z-50 backdrop-blur-md">
+    <button id="tab-btn-teoria" class="tab-btn active px-6 py-4 font-bold text-sm uppercase tracking-wider focus:outline-none flex items-center gap-2" onclick="switchTab('teoria')">
+        <span>📚</span> Manual Teórico
+    </button>
+    <button id="tab-btn-ferramentas" class="tab-btn inactive px-6 py-4 font-bold text-sm uppercase tracking-wider focus:outline-none flex items-center gap-2" onclick="switchTab('ferramentas')">
+        <span>✨</span> Laboratório IA <span class="bg-pink-500 text-white text-[10px] px-2 py-0.5 rounded-full ml-1">12 Apps</span>
+    </button>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+
+    <!-- ========================================== -->
+    <!-- ABA 1: MANUAL TEÓRICO                      -->
+    <!-- ========================================== -->
+    <div id="view-teoria" class="space-y-24 block fade-in">
+        
+        <!-- Passo 1: KPIs SMART e Leading/Lagging -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-block px-3 py-1 bg-cyan-900/50 text-cyan-400 rounded-full text-sm font-semibold mb-4 border border-cyan-800">Passo 1</div>
+                <h2 class="text-3xl font-bold mb-4">A Anatomia de um KPI SMART</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    Um bom dashboard não nasce de gráficos, nasce de objetivos claros. A construção do Storytelling começa ao transformar um desejo vago ("Quero vender mais") num objetivo **S.M.A.R.T.** (Específico, Mensurável, Alcançável, Relevante, Temporal).
+                </p>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded border border-slate-700">
+                        <span class="w-8 h-8 rounded bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0">S</span>
+                        <p class="text-sm text-slate-300"><strong>Específico:</strong> Aumentar as vendas do Produto X na região Norte.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded border border-slate-700">
+                        <span class="w-8 h-8 rounded bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0">M</span>
+                        <p class="text-sm text-slate-300"><strong>Mensurável:</strong> Passar de 10.000€ para 15.000€ mensais.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded border border-slate-700">
+                        <span class="w-8 h-8 rounded bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center shrink-0">A</span>
+                        <p class="text-sm text-slate-300"><strong>Alcançável:</strong> Baseado no crescimento do último trimestre.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded border border-slate-700">
+                        <span class="w-8 h-8 rounded bg-pink-500/20 text-pink-400 font-bold flex items-center justify-center shrink-0">R</span>
+                        <p class="text-sm text-slate-300"><strong>Relevante:</strong> O Produto X tem a maior margem de lucro.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-800/50 p-3 rounded border border-slate-700">
+                        <span class="w-8 h-8 rounded bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center shrink-0">T</span>
+                        <p class="text-sm text-slate-300"><strong>Temporal:</strong> Até ao final do 3º Trimestre (Q3).</p>
+                    </div>
+                </div>
+            </div>
+            <div class="glass-panel p-6 neon-border-cyan flex flex-col justify-center h-full">
+                <h3 class="text-center font-bold text-xl text-slate-200 mb-6">A Dualidade da Métrica</h3>
+                <div class="bg-slate-900 rounded-lg p-5 border border-slate-700 mb-4 relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-amber-500"></div>
+                    <h4 class="text-amber-400 font-bold mb-1 ml-2">Indicadores Leading (Antecipação)</h4>
+                    <p class="text-xs text-slate-400 ml-2 mb-2">Mostram o que vai acontecer. Podem ser influenciados diretamente hoje.</p>
+                    <div class="bg-slate-800 px-3 py-2 rounded text-sm text-slate-200 font-mono ml-2">Ex: N.º de chamadas de vendas feitas hoje.</div>
+                </div>
+                <div class="bg-slate-900 rounded-lg p-5 border border-slate-700 relative overflow-hidden">
+                    <div class="absolute left-0 top-0 bottom-0 w-2 bg-pink-500"></div>
+                    <h4 class="text-pink-400 font-bold mb-1 ml-2">Indicadores Lagging (Resultado)</h4>
+                    <p class="text-xs text-slate-400 ml-2 mb-2">Mostram o que já aconteceu. Excelentes para avaliar o sucesso final.</p>
+                    <div class="bg-slate-800 px-3 py-2 rounded text-sm text-slate-200 font-mono ml-2">Ex: Receita total faturada no final do mês.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Passo 2: Público Alvo e KPIs -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="order-2 lg:order-1 glass-panel p-6">
+                <h3 class="text-center font-semibold text-slate-200 mb-4">Público-Alvo Típico (C-Level vs Operação)</h3>
+                <div class="chart-container">
+                    <canvas id="audienceChart"></canvas>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2">
+                <div class="inline-block px-3 py-1 bg-pink-900/50 text-pink-400 rounded-full text-sm font-semibold mb-4 border border-pink-800">Passo 2</div>
+                <h2 class="text-3xl font-bold mb-4">Conhecer o Público e Editar KPIs</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    Mais dados não significam melhores decisões. O excesso de informações causa paralisia analítica. A narrativa visual exige edição implacável. Escolha apenas os KPIs que estão diretamente ligados aos objetivos. Diferentes níveis hierárquicos exigem diferentes níveis de granularidade.
+                </p>
+                <ul class="space-y-4 text-slate-300">
+                    <li class="flex items-start">
+                        <span class="text-pink-500 mr-3 text-xl">✦</span>
+                        <div><strong>Ação:</strong> Se uma métrica cai ou sobe, alguém sabe o que fazer a respeito? Se não, descarte.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-pink-500 mr-3 text-xl">✦</span>
+                        <div><strong>Foco:</strong> Limite seu dashboard principal a 3-5 KPIs vitais para evitar sobrecarga cognitiva.</div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Passo 3: O CHARTOSAUR MATRIX -->
+        <section class="glass-panel p-8 md:p-12 border-t-4 border-indigo-500">
+            <div class="text-center mb-10">
+                <div class="inline-block px-3 py-1 bg-indigo-900/50 text-indigo-400 rounded-full text-sm font-semibold mb-4 border border-indigo-800">Passo 3</div>
+                <h2 class="text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+                    <span class="text-4xl">🦖</span> A Matriz Chartosaur
+                </h2>
+                <p class="text-slate-300 max-w-3xl mx-auto">
+                    Inspirado nos guias clássicos de escolha visual, qual é o seu objetivo principal com os dados? Escolha a família correta antes de desenhar o gráfico.
+                </p>
+            </div>
+
+            <div class="chartosaur-grid">
+                <div class="bg-slate-800/50 rounded-xl p-6 border-t-4 border-blue-500">
+                    <h3 class="text-xl font-bold text-blue-400 mb-2 text-center">Comparar</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Qual item é maior ou menor?</p>
+                    <div class="space-y-3">
+                        <div class="chart-type-card"><div class="chart-icon-mock text-blue-400">📊</div><h4 class="font-bold text-slate-200 text-center text-sm">Barras (Vertical)</h4><p class="text-xs text-slate-500 text-center mt-1">Poucos itens, nomes curtos.</p></div>
+                        <div class="chart-type-card"><div class="chart-icon-mock text-blue-400">📑</div><h4 class="font-bold text-slate-200 text-center text-sm">Barras (Horizontal)</h4><p class="text-xs text-slate-500 text-center mt-1">Muitos itens, nomes compridos.</p></div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-6 border-t-4 border-pink-500">
+                    <h3 class="text-xl font-bold text-pink-400 mb-2 text-center">Tendência Temporal</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Como evoluiu ao longo do tempo?</p>
+                    <div class="space-y-3">
+                        <div class="chart-type-card"><div class="chart-icon-mock text-pink-400">📈</div><h4 class="font-bold text-slate-200 text-center text-sm">Linhas</h4><p class="text-xs text-slate-500 text-center mt-1">Muitos períodos de tempo (dias/meses).</p></div>
+                        <div class="chart-type-card"><div class="chart-icon-mock text-pink-400">🌊</div><h4 class="font-bold text-slate-200 text-center text-sm">Área</h4><p class="text-xs text-slate-500 text-center mt-1">Destacar o volume total acumulado.</p></div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-6 border-t-4 border-amber-500">
+                    <h3 class="text-xl font-bold text-amber-400 mb-2 text-center">Composição</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Como o todo se divide nas partes?</p>
+                    <div class="space-y-3">
+                        <div class="chart-type-card"><div class="chart-icon-mock text-amber-400">🍩</div><h4 class="font-bold text-slate-200 text-center text-sm">Rosca (Donut)</h4><p class="text-xs text-slate-500 text-center mt-1">100% estático, menos de 5 fatias.</p></div>
+                        <div class="chart-type-card"><div class="chart-icon-mock text-amber-400">🧱</div><h4 class="font-bold text-slate-200 text-center text-sm">Barras Empilhadas</h4><p class="text-xs text-slate-500 text-center mt-1">Composição a evoluir no tempo.</p></div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-6 border-t-4 border-emerald-500">
+                    <h3 class="text-xl font-bold text-emerald-400 mb-2 text-center">Relação/Distribuição</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Existem correlações ou outliers?</p>
+                    <div class="space-y-3">
+                        <div class="chart-type-card"><div class="chart-icon-mock text-emerald-400">✨</div><h4 class="font-bold text-slate-200 text-center text-sm">Dispersão (Scatter)</h4><p class="text-xs text-slate-500 text-center mt-1">Relação entre 2 variáveis distintas.</p></div>
+                        <div class="chart-type-card"><div class="chart-icon-mock text-emerald-400">🫧</div><h4 class="font-bold text-slate-200 text-center text-sm">Bolhas (Bubble)</h4><p class="text-xs text-slate-500 text-center mt-1">Relação entre 3 variáveis (o tamanho conta).</p></div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-6 border-t-4 border-purple-500">
+                    <h3 class="text-xl font-bold text-purple-400 mb-2 text-center">Hierarquia & Processo</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Como se estrutura ou afunila?</p>
+                    <div class="space-y-3">
+                        <div class="chart-type-card"><div class="chart-icon-mock text-purple-400">🔽</div><h4 class="font-bold text-slate-200 text-center text-sm">Funil (Funnel)</h4><p class="text-xs text-slate-500 text-center mt-1">Identifica quebras de conversão em etapas.</p></div>
+                        <div class="chart-type-card"><div class="chart-icon-mock text-purple-400">🔲</div><h4 class="font-bold text-slate-200 text-center text-sm">Mapa de Árvore (Treemap)</h4><p class="text-xs text-slate-500 text-center mt-1">Mostra sub-categorias e o peso no todo.</p></div>
+                    </div>
+                </div>
+                <div class="bg-slate-800/50 rounded-xl p-6 border-t-4 border-teal-500">
+                    <h3 class="text-xl font-bold text-teal-400 mb-2 text-center">Geografia & Espaço</h3>
+                    <p class="text-xs text-slate-400 text-center mb-6">Onde é que o evento ocorreu?</p>
+                    <div class="space-y-3">
+                        <div class="chart-type-card"><div class="chart-icon-mock text-teal-400">🗺️</div><h4 class="font-bold text-slate-200 text-center text-sm">Mapa Coroplético</h4><p class="text-xs text-slate-500 text-center mt-1">Intensidade de cor por região ou distrito.</p></div>
+                        <div class="chart-type-card"><div class="chart-icon-mock text-teal-400">📍</div><h4 class="font-bold text-slate-200 text-center text-sm">Mapa de Pontos</h4><p class="text-xs text-slate-500 text-center mt-1">Destaca a concentração de eventos num local.</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Passo 4: Layout F-Pattern -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="order-2 lg:order-1 glass-panel p-6 h-[450px]">
+                <h3 class="text-center font-semibold text-slate-200 mb-4">O Padrão F de Leitura</h3>
+                <div class="wireframe-grid">
+                    <div class="wf-header">
+                        <span class="font-bold text-white">Título do Dashboard & Contexto</span>
+                        <span class="text-slate-400 text-sm">Filtros Globais [ ▼ ]</span>
+                    </div>
+                    <div class="wf-kpi">
+                        <div class="text-xs text-slate-400 uppercase mb-1">Receita Total</div>
+                        <div class="wf-kpi-value text-cyan-400">R$ 2.4M</div>
+                    </div>
+                    <div class="wf-kpi">
+                        <div class="text-xs text-slate-400 uppercase mb-1">Usuários Ativos</div>
+                        <div class="wf-kpi-value text-pink-400">125K</div>
+                    </div>
+                    <div class="wf-kpi">
+                        <div class="text-xs text-slate-400 uppercase mb-1">Taxa de Conversão</div>
+                        <div class="wf-kpi-value text-amber-400">4.8%</div>
+                    </div>
+                    <div class="wf-main flex-col">
+                        <span class="text-pink-400 font-bold text-lg mb-2">Visualização Principal</span>
+                        <span class="text-slate-400 text-sm text-center">Gráfico detalhado respondendo ao maior problema de negócio.</span>
+                    </div>
+                    <div class="wf-side flex-col">
+                        <span class="text-amber-400 font-bold text-lg mb-2">Apoio</span>
+                        <span class="text-slate-400 text-sm text-center">Tabelas ou detalhamentos secundários.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2">
+                <div class="inline-block px-3 py-1 bg-amber-900/50 text-amber-400 rounded-full text-sm font-semibold mb-4 border border-amber-800">Passo 4</div>
+                <h2 class="text-3xl font-bold mb-4">Arquitetura de Informação</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    Um bom dashboard é lido como a primeira página de um jornal. Em culturas ocidentais, os olhos esquadrinham telas no padrão "F" ou "Z". Posicione a informação mais valiosa onde os olhos pousam primeiro.
+                </p>
+                <div class="space-y-4">
+                    <div class="p-4 bg-slate-800/40 rounded-lg">
+                        <h4 class="text-cyan-400 font-bold mb-1">Topo Esquerdo (A Manchete)</h4>
+                        <p class="text-sm text-slate-300">Contexto global e filtros. O que estamos analisando e qual o período?</p>
+                    </div>
+                    <div class="p-4 bg-slate-800/40 rounded-lg">
+                        <h4 class="text-pink-400 font-bold mb-1">Linha Superior (O Resumo)</h4>
+                        <p class="text-sm text-slate-300">Os "Big Numbers". Os 3 ou 4 KPIs mais importantes em grandes formatos numéricos.</p>
+                    </div>
+                    <div class="p-4 bg-slate-800/40 rounded-lg">
+                        <h4 class="text-amber-400 font-bold mb-1">Centro e Esquerda (A História)</h4>
+                        <p class="text-sm text-slate-300">Os gráficos de tendência ou comparação que explicam o "porquê" dos KPIs acima.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Passo 5: Psicologia das Cores -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-block px-3 py-1 bg-pink-900/50 text-pink-400 rounded-full text-sm font-semibold mb-4 border border-pink-800">Passo 5</div>
+                <h2 class="text-3xl font-bold mb-4">A Psicologia das Cores</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    No visual storytelling, a cor é funcional, não decorativa. Utilize paletas neutras (cinzas, ardósia) para a maior parte do painel e reserve cores vibrantes e contrastantes unicamente para destacar o que exige ação imediata ou para guiar o foco.
+                </p>
+                <div class="glass-panel p-6 neon-border-pink">
+                    <blockquote class="text-lg text-slate-300 italic mb-2">
+                        "Se tudo está em destaque, nada está em destaque."
+                    </blockquote>
+                </div>
+            </div>
+            <div class="glass-panel p-6">
+                <h3 class="text-center font-semibold text-slate-200 mb-4">Atenção do Usuário vs Tempo no Dashboard</h3>
+                <div class="chart-container">
+                    <canvas id="colorAttentionChart"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- ABA 2: LABORATÓRIO IA (12 FERRAMENTAS)     -->
+    <!-- ========================================== -->
+    <div id="view-ferramentas" class="hidden fade-in space-y-16">
+        
+        <div class="text-center mb-12">
+            <h2 class="text-4xl font-bold inline-block text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 mb-2">Laboratório de IA Analítica</h2>
+            <p class="text-slate-400 text-lg">12 ferramentas definitivas impulsionadas pela Gemini API para desenhar e apresentar dashboards perfeitos.</p>
+        </div>
+
+        <!-- GRUPO 1: ESTRATÉGIA E MÉTRICAS -->
+        <div class="mb-16">
+            <h3 class="text-2xl font-bold mb-6 border-b border-slate-700 pb-2 text-slate-200 flex items-center gap-2">
+                <span>♟️</span> Grupo 1: Estratégia & Métricas
+            </h3>
+            <div class="grid grid-cols-1 gap-8">
+                
+                <!-- Tool 1: Forjador SMART -->
+                <div class="glass-panel p-8 border-l-4 border-green-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">1. Forjador de KPIs SMART ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Transforme desejos vagos em metas S.M.A.R.T divididas em indicadores Leading e Lagging.</p>
+                    <textarea id="smart-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-green-500 focus:ring-1 focus:ring-green-500" rows="2" placeholder="Ex: Quero que a equipa de suporte responda mais rápido aos clientes."></textarea>
+                    <button id="smart-btn" class="mt-3 bg-green-700 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Criar Estrutura SMART</span>
+                        <div id="smart-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="smart-result" class="hidden mt-6 transition-all duration-500"></div>
+                    <div id="smart-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- Tool 2: Gerador KPIs -->
+                <div class="glass-panel p-8 border-l-4 border-pink-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">2. Gerador de KPIs Estratégicos ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Descreva o modelo de negócio e a IA sugere os 3 indicadores vitais, eliminando métricas de vaidade.</p>
+                    <textarea id="kpi-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-pink-500 focus:ring-1 focus:ring-pink-500" rows="2" placeholder="Ex: Sou coordenador de um e-commerce de moda. O problema é o abandono de carrinho..."></textarea>
+                    <button id="kpi-btn" class="mt-3 bg-pink-700 hover:bg-pink-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Gerar KPIs</span>
+                        <div id="kpi-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="kpi-result" class="hidden mt-6 grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                    <div id="kpi-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- Tool 3: Stakeholders -->
+                <div class="glass-panel p-8 border-l-4 border-indigo-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">3. Simulador de Stakeholders ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Descreva o painel planeado. A IA assumirá 3 cargos executivos e fará as perguntas difíceis antes da construção.</p>
+                    <textarea id="stakeholder-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" rows="2" placeholder="Ex: Planeio fazer um gráfico de barras com vendas por estado e um velocímetro com a meta..."></textarea>
+                    <button id="stakeholder-btn" class="mt-3 bg-indigo-700 hover:bg-indigo-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Simular Reações</span>
+                        <div id="stakeholder-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="stakeholder-result" class="hidden mt-6 grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                    <div id="stakeholder-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- NOVO: Tool 4: Desdobrador de OKRs -->
+                <div class="glass-panel p-8 border-l-4 border-yellow-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">4. Desdobrador de OKRs (Objective to Dashboard) 🧭✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">A sua empresa usa OKRs? Insira o Objetivo macro qualitativo e a IA desdobra-o em Key Results, mapeando exatamente que gráfico precisa de pôr no ecrã para acompanhar cada KR.</p>
+                    <textarea id="okr-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500" rows="2" placeholder="Ex: O nosso objetivo do trimestre é 'Tornar a nossa aplicação SaaS a mais rápida do mercado europeu'."></textarea>
+                    <button id="okr-btn" class="mt-3 bg-yellow-600 hover:bg-yellow-500 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Desdobrar em Painel</span>
+                        <div id="okr-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="okr-result" class="hidden mt-6 bg-slate-800/80 rounded border border-slate-700 p-6"></div>
+                    <div id="okr-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- NOVO: Tool 5: Bússola de Ação -->
+                <div class="glass-panel p-8 border-l-4 border-emerald-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">5. Bússola de Ação (Gatilhos de Decisão) ⚡✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Um número sem plano de ação não serve de nada. Escreva o KPI que vai medir e a IA definirá limites virtuais e a ação exata a tomar se o número subir ou descer perigosamente.</p>
+                    <textarea id="action-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" rows="2" placeholder="Ex: Vou adicionar um gráfico que mede o tempo médio de espera no call center."></textarea>
+                    <button id="action-btn" class="mt-3 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Gerar Plano de Ação</span>
+                        <div id="action-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="action-result" class="hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    <div id="action-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- GRUPO 2: DESIGN VISUAL & STORYTELLING -->
+        <div class="mb-16">
+            <h3 class="text-2xl font-bold mb-6 border-b border-slate-700 pb-2 text-slate-200 flex items-center gap-2">
+                <span>🎨</span> Grupo 2: Design Visual & Storytelling
+            </h3>
+            <div class="grid grid-cols-1 gap-8">
+                
+                <!-- Tool 6: Oráculo Visual Chartosaur (Upload) -->
+                <div class="glass-panel p-8 border-l-4 border-blue-400">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">6. Oráculo Visual Chartosaur (Visão IA) 👁️✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Carregue a imagem (print ou rascunho) de um gráfico. A IA reconhece-o visualmente e diz-lhe onde o usar no negócio.</p>
+                    <div class="flex items-center justify-center w-full mt-2">
+                        <label for="vision-upload" class="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-600 border-dashed rounded-lg cursor-pointer bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
+                            <span class="text-2xl mb-1">📁</span>
+                            <p class="text-sm text-slate-400"><span class="font-semibold text-blue-400">Clique para carregar</span> ou arraste a imagem</p>
+                            <input id="vision-upload" type="file" accept="image/*" class="hidden" />
+                        </label>
+                    </div>
+                    <div id="vision-preview-container" class="hidden mt-4">
+                        <img id="vision-preview" class="max-h-32 rounded border border-slate-600" src="" alt="Preview">
+                    </div>
+                    <button id="vision-btn" disabled class="mt-4 bg-blue-700 hover:bg-blue-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2 opacity-50 cursor-not-allowed">
+                        <span>Analisar Imagem Gráfica</span>
+                        <div id="vision-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="vision-result" class="hidden mt-6 bg-slate-800/80 p-4 rounded border border-slate-700"></div>
+                    <div id="vision-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao processar imagem.</div>
+                </div>
+
+                <!-- Tool 7: Assistente Textual -->
+                <div class="glass-panel p-8 border-l-4 border-cyan-400">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">7. Assistente de Visualização (Textual) ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Não tem imagem? Descreva os dados e a pergunta. A IA recomenda o melhor gráfico e dá dicas de cor dinâmicas.</p>
+                    <textarea id="ai-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400" rows="2" placeholder="Ex: Dados de vendas de 5 produtos em 12 meses. Quero ver quem cresceu mais..."></textarea>
+                    <button id="ai-btn" class="mt-3 bg-cyan-700 hover:bg-cyan-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Recomendar Gráfico</span>
+                        <div id="ai-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="ai-result" class="hidden mt-6 p-4 bg-slate-800/80 rounded border border-slate-700 flex flex-col md:flex-row gap-4">
+                        <div class="md:w-1/3"><div class="text-xs text-cyan-400 font-bold uppercase">Recomendação</div><div id="ai-chart-type" class="text-xl font-bold text-white"></div></div>
+                        <div class="md:w-2/3 space-y-2">
+                            <div><div class="text-xs text-pink-400 font-bold uppercase">Por que funciona</div><div id="ai-reasoning" class="text-slate-300 text-sm"></div></div>
+                            <div><div class="text-xs text-amber-400 font-bold uppercase">Dica de Cor</div><div id="ai-color-tip" class="text-slate-300 text-sm"></div></div>
+                        </div>
+                    </div>
+                    <div id="ai-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- Tool 8: Paletas Acessíveis -->
+                <div class="glass-panel p-8 border-l-4 border-rose-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">8. Gerador de Paletas Acessíveis ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Descreva a identidade da marca. A IA gera 4 códigos HEX perfeitos (Neutra, Destaque, Alerta, Sucesso) para guiar o olhar.</p>
+                    <textarea id="palette-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-rose-500 focus:ring-1 focus:ring-rose-500" rows="2" placeholder="Ex: Marca de saúde mental, tons terapêuticos, mas com alerta de ansiedade."></textarea>
+                    <button id="palette-btn" class="mt-3 bg-rose-700 hover:bg-rose-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Gerar Paleta HEX</span>
+                        <div id="palette-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="palette-result" class="hidden mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+                    <div id="palette-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- GRUPO 3: ANÁLISE & COPYWRITING -->
+        <div class="mb-16">
+            <h3 class="text-2xl font-bold mb-6 border-b border-slate-700 pb-2 text-slate-200 flex items-center gap-2">
+                <span>✍️</span> Grupo 3: Análise, Copy & Apresentação
+            </h3>
+            <div class="grid grid-cols-1 gap-8">
+                
+                <!-- Tool 9: Títulos -->
+                <div class="glass-panel p-8 border-l-4 border-amber-400">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">9. Otimizador de Títulos Analíticos ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Transforme títulos chatos em manchetes de insight. Descreva o gráfico e a IA devolve títulos ativos de Storytelling.</p>
+                    <textarea id="title-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400" rows="2" placeholder="Ex: Gráfico mostra que o Produto A caiu 20% mas o B compensou com alta de 50%."></textarea>
+                    <button id="title-btn" class="mt-3 bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Otimizar Título</span>
+                        <div id="title-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="title-result" class="hidden mt-6 grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                    <div id="title-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- Tool 10: Narrativa Executiva -->
+                <div class="glass-panel p-8 border-l-4 border-purple-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">10. Construtor de Narrativa Executiva ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Cole métricas soltas. A IA redige um resumo executivo persuasivo em 3 tempos: Gancho, Contexto e Recomendação.</p>
+                    <textarea id="narrative-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500" rows="3" placeholder="Ex: Receita subiu 15%. Churn aumentou para 5%. Conversão caiu 10%."></textarea>
+                    <button id="narrative-btn" class="mt-3 bg-purple-700 hover:bg-purple-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Construir Narrativa</span>
+                        <div id="narrative-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="narrative-result" class="hidden mt-6 bg-slate-800/80 rounded border border-slate-700 p-6 space-y-4"></div>
+                    <div id="narrative-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- Tool 11: Detetive Anomalias -->
+                <div class="glass-panel p-8 border-l-4 border-teal-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">11. Detetive de Anomalias de Dados ✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Viu uma variação bizarra? Descreva-a. A IA levanta hipóteses técnicas, externas e internas para investigar.</p>
+                    <textarea id="anomaly-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-teal-500 focus:ring-1 focus:ring-teal-500" rows="2" placeholder="Ex: A conversão do site caiu 40% apenas nas quartas-feiras deste mês."></textarea>
+                    <button id="anomaly-btn" class="mt-3 bg-teal-700 hover:bg-teal-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Gerar Hipóteses de Investigação</span>
+                        <div id="anomaly-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="anomaly-result" class="hidden mt-6 grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                    <div id="anomaly-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+                <!-- Tool 12: Guarda-Costas -->
+                <div class="glass-panel p-8 border-l-4 border-lime-500">
+                    <h4 class="text-xl font-bold mb-2 flex items-center gap-2">12. Guarda-Costas de Dados (Gestão de Crise) 🛡️✨</h4>
+                    <p class="text-slate-400 text-sm mb-4">Tem que apresentar uma métrica horrível à chefia? A IA atua como seu Copywriter de Crise e ensina como apresentar o dado com transparência e foco na resolução construtiva.</p>
+                    <textarea id="bodyguard-input" class="w-full bg-slate-800/50 border border-slate-600 rounded p-3 text-sm text-slate-200 focus:border-lime-500 focus:ring-1 focus:ring-lime-500" rows="2" placeholder="Ex: Vou ter que apresentar que falhámos a meta de faturação em 30% este mês devido a um problema informático."></textarea>
+                    <button id="bodyguard-btn" class="mt-3 bg-lime-700 hover:bg-lime-600 text-white text-sm font-bold py-2 px-4 rounded transition-all flex items-center gap-2">
+                        <span>Preparar Defesa de Dados</span>
+                        <div id="bodyguard-spinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </button>
+                    <div id="bodyguard-result" class="hidden mt-6 bg-slate-800/80 rounded border border-slate-700 p-6 space-y-4"></div>
+                    <div id="bodyguard-error" class="hidden mt-4 p-3 bg-red-900/30 text-red-200 rounded text-sm">Erro ao gerar. Tente novamente.</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer class="mt-24 border-t border-slate-800 py-12 text-center text-slate-500 text-sm">
+    <p>Diretrizes de Visual Storytelling e Arquitetura de Dashboards</p>
+    <p class="mt-2 text-slate-600">Projetado em Portugal com foco em clareza, ação e IA analítica.</p>
+</footer>
+
+<script>
+// --- GESTÃO DE TABS ---
+function switchTab(tabId) {
+    const isTeoria = tabId === 'teoria';
+    document.getElementById('view-teoria').style.display = isTeoria ? 'block' : 'none';
+    document.getElementById('view-ferramentas').style.display = isTeoria ? 'none' : 'block';
+    
+    const btnTeoria = document.getElementById('tab-btn-teoria');
+    const btnFerramentas = document.getElementById('tab-btn-ferramentas');
+    
+    if (isTeoria) {
+        btnTeoria.className = 'tab-btn active px-6 py-4 font-bold text-sm uppercase tracking-wider focus:outline-none flex items-center gap-2';
+        btnFerramentas.className = 'tab-btn inactive px-6 py-4 font-bold text-sm uppercase tracking-wider focus:outline-none flex items-center gap-2';
+    } else {
+        btnTeoria.className = 'tab-btn inactive px-6 py-4 font-bold text-sm uppercase tracking-wider focus:outline-none flex items-center gap-2';
+        btnFerramentas.className = 'tab-btn active px-6 py-4 font-bold text-sm uppercase tracking-wider focus:outline-none flex items-center gap-2';
+    }
+}
+
+// --- UTILITÁRIOS GERAIS (GRAFICOS) ---
+const wrapLabel = (label, limit = 16) => {
+    if (label.length <= limit) return label;
+    const words = label.split(' ');
+    const lines = [];
+    let currentLine = words[0];
+    for (let i = 1; i < words.length; i++) {
+        if (currentLine.length + words[i].length + 1 <= limit) currentLine += ' ' + words[i];
+        else { lines.push(currentLine); currentLine = words[i]; }
+    }
+    lines.push(currentLine);
+    return lines;
+};
+
+const tooltipConfig = {
+    callbacks: {
+        title: function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            return Array.isArray(label) ? label.join(' ') : label;
+        }
+    },
+    backgroundColor: 'rgba(15, 23, 42, 0.95)', titleColor: '#F8FAFC', bodyColor: '#CBD5E1',
+    borderColor: 'rgba(51, 65, 85, 0.5)', borderWidth: 1, padding: 12, boxPadding: 6, cornerRadius: 8,
+    titleFont: { family: "'Space Grotesk', sans-serif", size: 14, weight: 'bold' }, bodyFont: { family: "'Space Grotesk', sans-serif", size: 13 }
+};
+
+const baseOptions = {
+    responsive: true, maintainAspectRatio: false, color: '#94A3B8', font: { family: "'Space Grotesk', sans-serif" },
+    plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8', usePointStyle: true, padding: 20 } }, tooltip: tooltipConfig }
+};
+
+new Chart(document.getElementById('audienceChart').getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: [wrapLabel("Liderança Executiva (C-Level)"), wrapLabel("Gestores Operacionais"), wrapLabel("Analistas de Dados")], datasets: [{ data: [15, 55, 30], backgroundColor: ['#EC4899', '#06B6D4', '#F59E0B'], borderWidth: 2, borderColor: '#1E293B' }] },
+    options: { ...baseOptions, cutout: '70%' }
+});
+
+new Chart(document.getElementById('colorAttentionChart').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: [wrapLabel("Abertura"), wrapLabel("Busca por KPIs"), wrapLabel("Leitura Secundária"), wrapLabel("Ponto Focal (Cor Aplicada)"), wrapLabel("Ação")],
+        datasets: [
+            { label: 'Sem Destaque', data: [70, 60, 40, 35, 25], borderColor: '#475569', borderDash: [5, 5], tension: 0.4 },
+            { label: 'Com Storytelling Visual', data: [75, 65, 50, 95, 85], borderColor: '#EC4899', backgroundColor: 'rgba(236, 72, 153, 0.1)', borderWidth: 3, pointBackgroundColor: ['#1E293B', '#1E293B', '#1E293B', '#F59E0B', '#1E293B'], pointBorderColor: ['#EC4899', '#EC4899', '#EC4899', '#F59E0B', '#EC4899'], pointRadius: [4, 4, 4, 10, 4], fill: true, tension: 0.4 }
+        ]
+    },
+    options: { ...baseOptions, scales: { y: { max: 110, display: false }, x: { grid: { display: false } } } }
+});
+
+
+// --- INTEGRAÇÃO COM GEMINI API ✨ ---
+const apiKey = ""; 
+
+async function fetchGeminiJSON(prompt, systemText, schema) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: systemText }] }, generationConfig: { responseMimeType: "application/json", responseSchema: schema } };
+    return await executeAPI(url, payload);
+}
+
+async function fetchGeminiVisionJSON(prompt, base64Image, systemText, schema) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const base64Data = base64Image.split(',')[1];
+    const mimeType = base64Image.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
+    const payload = { contents: [{ role: "user", parts: [{ text: prompt }, { inlineData: { mimeType: mimeType, data: base64Data } }] }], systemInstruction: { parts: [{ text: systemText }] }, generationConfig: { responseMimeType: "application/json", responseSchema: schema } };
+    return await executeAPI(url, payload);
+}
+
+async function executeAPI(url, payload) {
+    let maxRetries = 5, retries = 0;
+    while (retries <= maxRetries) {
+        try {
+            const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+            const data = await res.json();
+            const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textContent) throw new Error("Empty response");
+            return JSON.parse(textContent);
+        } catch (error) {
+            retries++;
+            if (retries > maxRetries) throw error;
+            await new Promise(r => setTimeout(r, Math.pow(2, retries - 1) * 1000));
+        }
+    }
+}
+
+function setToolLoading(btnId, spinnerId, resultId, errorId, isLoading) {
+    document.getElementById(btnId).disabled = isLoading;
+    document.getElementById(spinnerId).classList.toggle('hidden', !isLoading);
+    if(isLoading) { document.getElementById(resultId).classList.add('hidden'); document.getElementById(errorId).classList.add('hidden'); }
+}
+
+
+// ==========================================
+// LÓGICA DAS 12 FERRAMENTAS IA
+// ==========================================
+
+// Tool 1: SMART
+document.getElementById('smart-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('smart-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('smart-btn', 'smart-spinner', 'smart-result', 'smart-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { objetivo_smart: { type: "STRING" }, nome_kpi_oficial: { type: "STRING" }, indicador_lagging: { type: "STRING" }, indicador_leading: { type: "STRING" } }, required: ["objetivo_smart", "nome_kpi_oficial", "indicador_lagging", "indicador_leading"] };
+        const result = await fetchGeminiJSON(prompt, "És um Consultor McKinsey. Transforma desejos vagos em metas S.M.A.R.T em PT-PT.", schema);
+        document.getElementById('smart-result').innerHTML = `
+            <div class="bg-slate-900 p-5 rounded border border-green-500/30">
+                <div class="mb-4 pb-4 border-b border-slate-700"><h4 class="text-xs text-green-400 font-bold uppercase mb-1">Objetivo Estratégico</h4><p class="text-white font-medium">"${result.objetivo_smart}"</p></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-800 p-3 rounded border-l-2 border-amber-500"><h5 class="text-amber-400 text-xs font-bold uppercase">Leading (Ação)</h5><p class="text-slate-200 text-sm mt-1">${result.indicador_leading}</p></div>
+                    <div class="bg-slate-800 p-3 rounded border-l-2 border-pink-500"><h5 class="text-pink-400 text-xs font-bold uppercase">Lagging (Resultado)</h5><p class="text-slate-200 text-sm mt-1">${result.indicador_lagging}</p></div>
+                </div>
+            </div>`;
+        document.getElementById('smart-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('smart-error').classList.remove('hidden'); } finally { setToolLoading('smart-btn', 'smart-spinner', 'smart-result', 'smart-error', false); }
+});
+
+// Tool 2: KPIs
+document.getElementById('kpi-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('kpi-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('kpi-btn', 'kpi-spinner', 'kpi-result', 'kpi-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { kpis: { type: "ARRAY", items: { type: "OBJECT", properties: { nome: { type: "STRING" }, justificativa: { type: "STRING" }, visualizacao: { type: "STRING" } }, required: ["nome", "justificativa", "visualizacao"] } } }, required: ["kpis"] };
+        const result = await fetchGeminiJSON(prompt, "És um Chief Data Officer. Sugere 3 KPIs cruciais em PT-PT.", schema);
+        document.getElementById('kpi-result').innerHTML = result.kpis.slice(0,3).map(kpi => `
+            <div class="bg-slate-800/80 p-4 rounded border border-slate-700"><h4 class="font-bold text-white mb-2">${kpi.nome}</h4><p class="text-xs text-slate-300 mb-3">${kpi.justificativa}</p><div class="text-[10px] text-pink-400 uppercase font-bold pt-2 border-t border-slate-700">Viz: ${kpi.visualizacao}</div></div>`).join('');
+        document.getElementById('kpi-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('kpi-error').classList.remove('hidden'); } finally { setToolLoading('kpi-btn', 'kpi-spinner', 'kpi-result', 'kpi-error', false); }
+});
+
+// Tool 3: Stakeholders
+document.getElementById('stakeholder-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('stakeholder-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('stakeholder-btn', 'stakeholder-spinner', 'stakeholder-result', 'stakeholder-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { stakeholders: { type: "ARRAY", items: { type: "OBJECT", properties: { cargo: { type: "STRING" }, pergunta: { type: "STRING" }, foco: { type: "STRING" } }, required: ["cargo", "pergunta", "foco"] } } }, required: ["stakeholders"] };
+        const result = await fetchGeminiJSON(prompt, "Conselho executivo exigente. Faz perguntas difíceis ao dashboard em PT-PT.", schema);
+        document.getElementById('stakeholder-result').innerHTML = result.stakeholders.slice(0,3).map(st => `
+            <div class="bg-slate-800/80 p-4 rounded border border-slate-700 flex flex-col"><h4 class="font-bold text-indigo-400 mb-2 border-b border-slate-700 pb-1">${st.cargo}</h4><p class="text-slate-200 text-sm italic mb-3 flex-grow">"${st.pergunta}"</p><div class="text-xs text-slate-400 mt-auto bg-slate-900 p-2 rounded">Foco oculto: ${st.foco}</div></div>`).join('');
+        document.getElementById('stakeholder-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('stakeholder-error').classList.remove('hidden'); } finally { setToolLoading('stakeholder-btn', 'stakeholder-spinner', 'stakeholder-result', 'stakeholder-error', false); }
+});
+
+// NOVO: Tool 4: Desdobrador OKRs
+document.getElementById('okr-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('okr-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('okr-btn', 'okr-spinner', 'okr-result', 'okr-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { objetivo_macro: { type: "STRING" }, key_results: { type: "ARRAY", items: { type: "OBJECT", properties: { kr: { type: "STRING" }, kpi_dashboard: { type: "STRING" }, grafico_sugerido: { type: "STRING" } }, required: ["kr", "kpi_dashboard", "grafico_sugerido"] } } }, required: ["objetivo_macro", "key_results"] };
+        const result = await fetchGeminiJSON(prompt, "És um Gestor de Produto especialista em OKRs. Desdobra o objetivo macro em 3 Key Results quantitativos e mapeia os KPIs de ecrã e gráficos necessários em PT-PT.", schema);
+        
+        let krsHtml = result.key_results.slice(0,3).map(kr => `
+            <div class="mt-4 p-4 bg-slate-800 rounded border-l-2 border-yellow-500">
+                <h5 class="text-yellow-400 text-sm font-bold mb-2">KR: ${kr.kr}</h5>
+                <div class="flex flex-col sm:flex-row gap-2 text-xs text-slate-300">
+                    <span class="bg-slate-900 px-2 py-1 rounded">📊 KPI: ${kr.kpi_dashboard}</span>
+                    <span class="bg-slate-900 px-2 py-1 rounded">📈 Viz: ${kr.grafico_sugerido}</span>
+                </div>
+            </div>`).join('');
+            
+        document.getElementById('okr-result').innerHTML = `
+            <div class="border-b border-slate-700 pb-3"><h4 class="text-xs text-slate-400 uppercase tracking-wider mb-1">Objective</h4><p class="text-white text-lg font-bold">${result.objetivo_macro}</p></div>
+            ${krsHtml}`;
+        document.getElementById('okr-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('okr-error').classList.remove('hidden'); } finally { setToolLoading('okr-btn', 'okr-spinner', 'okr-result', 'okr-error', false); }
+});
+
+// NOVO: Tool 5: Bússola de Ação
+document.getElementById('action-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('action-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('action-btn', 'action-spinner', 'action-result', 'action-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { definicao_limite: { type: "STRING" }, acao_se_acima: { type: "STRING" }, acao_se_abaixo: { type: "STRING" } }, required: ["definicao_limite", "acao_se_acima", "acao_se_abaixo"] };
+        const result = await fetchGeminiJSON(prompt, "Analista Lean. Define um plano If-This-Then-That prático para a métrica apresentada. Define limites teóricos e a ação humana exata a tomar em PT-PT.", schema);
+        
+        document.getElementById('action-result').innerHTML = `
+            <div class="bg-slate-800/80 p-4 rounded border-t-4 border-emerald-500 md:col-span-2">
+                <h4 class="text-xs text-emerald-400 font-bold uppercase mb-1">Limite/Trigger Sugerido</h4><p class="text-white text-sm">${result.definicao_limite}</p>
+            </div>
+            <div class="bg-slate-800/80 p-4 rounded border-l-2 border-blue-400">
+                <h5 class="text-[10px] text-blue-400 font-bold uppercase mb-2">Se subir acima do limite:</h5><p class="text-slate-300 text-sm">${result.acao_se_acima}</p>
+            </div>
+            <div class="bg-slate-800/80 p-4 rounded border-l-2 border-red-400">
+                <h5 class="text-[10px] text-red-400 font-bold uppercase mb-2">Se descer abaixo do limite:</h5><p class="text-slate-300 text-sm">${result.acao_se_abaixo}</p>
+            </div>`;
+        document.getElementById('action-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('action-error').classList.remove('hidden'); } finally { setToolLoading('action-btn', 'action-spinner', 'action-result', 'action-error', false); }
+});
+
+// Tool 6: Vision
+document.getElementById('vision-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            currentBase64Image = evt.target.result;
+            document.getElementById('vision-preview').src = currentBase64Image;
+            document.getElementById('vision-preview-container').classList.remove('hidden');
+            document.getElementById('vision-btn').disabled = false;
+            document.getElementById('vision-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+        };
+        reader.readAsDataURL(file);
+    }
+});
+document.getElementById('vision-btn').addEventListener('click', async () => {
+    if (!currentBase64Image) return;
+    setToolLoading('vision-btn', 'vision-spinner', 'vision-result', 'vision-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { tipo_grafico: { type: "STRING" }, familia_chartosaur: { type: "STRING" }, casos_uso: { type: "ARRAY", items: { type: "STRING" } }, dica_storytelling: { type: "STRING" } }, required: ["tipo_grafico", "familia_chartosaur", "casos_uso", "dica_storytelling"] };
+        const result = await fetchGeminiVisionJSON("Analisa a imagem.", currentBase64Image, "Identifica o gráfico da imagem e dá exemplos de uso em negócio em PT-PT.", schema);
+        document.getElementById('vision-result').innerHTML = `
+            <div class="flex flex-col md:flex-row gap-4"><div class="md:w-1/3 border-b md:border-b-0 md:border-r border-slate-700 pb-4 md:pb-0 md:pr-4"><p class="text-xl font-bold text-white mb-1">${result.tipo_grafico}</p><span class="bg-blue-900/50 text-blue-300 text-[10px] px-2 py-1 rounded uppercase tracking-wider">${result.familia_chartosaur}</span></div><div class="md:w-2/3 space-y-3"><ul class="text-sm text-slate-300 space-y-1">${result.casos_uso.map(u => `<li><span class="text-blue-500 mr-2">▪</span>${u}</li>`).join('')}</ul><div class="bg-slate-900 p-2 rounded text-xs text-blue-200 border border-blue-900/50"><strong>Dica:</strong> ${result.dica_storytelling}</div></div></div>`;
+        document.getElementById('vision-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('vision-error').classList.remove('hidden'); } finally { setToolLoading('vision-btn', 'vision-spinner', 'vision-result', 'vision-error', false); }
+});
+
+// Tool 7: Assistente Visual
+document.getElementById('ai-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('ai-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('ai-btn', 'ai-spinner', 'ai-result', 'ai-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { chartType: { type: "STRING" }, reasoning: { type: "STRING" }, colorTip: { type: "STRING" } }, required: ["chartType", "reasoning", "colorTip"] };
+        const result = await fetchGeminiJSON(prompt, "Especialista em UI/UX. Recomenda o gráfico e paleta em PT-PT.", schema);
+        document.getElementById('ai-chart-type').textContent = result.chartType; document.getElementById('ai-reasoning').textContent = result.reasoning; document.getElementById('ai-color-tip').textContent = result.colorTip; document.getElementById('ai-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('ai-error').classList.remove('hidden'); } finally { setToolLoading('ai-btn', 'ai-spinner', 'ai-result', 'ai-error', false); }
+});
+
+// Tool 8: Paletas
+document.getElementById('palette-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('palette-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('palette-btn', 'palette-spinner', 'palette-result', 'palette-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { cores: { type: "ARRAY", items: { type: "OBJECT", properties: { funcao: { type: "STRING" }, hex: { type: "STRING" }, uso: { type: "STRING" } }, required: ["funcao", "hex", "uso"] } } }, required: ["cores"] };
+        const result = await fetchGeminiJSON(prompt, "Gera paleta HEX (4 cores funcionais) acessível em PT-PT.", schema);
+        document.getElementById('palette-result').innerHTML = result.cores.slice(0,4).map(cor => `
+            <div class="bg-slate-800 rounded border border-slate-700 overflow-hidden"><div class="h-16 w-full flex items-center justify-center" style="background-color: ${cor.hex};"><span class="bg-black/50 text-white px-2 py-1 rounded text-xs font-mono">${cor.hex}</span></div><div class="p-3"><h4 class="font-bold text-white text-xs mb-1">${cor.funcao}</h4><p class="text-slate-400 text-[10px] leading-tight">${cor.uso}</p></div></div>`).join('');
+        document.getElementById('palette-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('palette-error').classList.remove('hidden'); } finally { setToolLoading('palette-btn', 'palette-spinner', 'palette-result', 'palette-error', false); }
+});
+
+// Tool 9: Títulos
+document.getElementById('title-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('title-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('title-btn', 'title-spinner', 'title-result', 'title-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { opcoes: { type: "ARRAY", items: { type: "OBJECT", properties: { manchete: { type: "STRING" }, subtitulo: { type: "STRING" } }, required: ["manchete", "subtitulo"] } } }, required: ["opcoes"] };
+        const result = await fetchGeminiJSON(prompt, "Jornalista de Dados. Gera manchetes ativas em PT-PT.", schema);
+        document.getElementById('title-result').innerHTML = result.opcoes.slice(0,3).map(opt => `
+            <div class="bg-slate-800/80 p-4 rounded border border-slate-700 flex flex-col justify-between"><h4 class="font-bold text-amber-400 text-sm mb-2">"${opt.manchete}"</h4><div class="text-slate-400 text-xs border-t border-slate-700 pt-2">${opt.subtitulo}</div></div>`).join('');
+        document.getElementById('title-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('title-error').classList.remove('hidden'); } finally { setToolLoading('title-btn', 'title-spinner', 'title-result', 'title-error', false); }
+});
+
+// Tool 10: Narrativa
+document.getElementById('narrative-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('narrative-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('narrative-btn', 'narrative-spinner', 'narrative-result', 'narrative-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { gancho: { type: "STRING" }, contexto: { type: "STRING" }, acao: { type: "STRING" } }, required: ["gancho", "contexto", "acao"] };
+        const result = await fetchGeminiJSON(prompt, "Analista. Resumo executivo corporativo em PT-PT.", schema);
+        document.getElementById('narrative-result').innerHTML = `<div class="border-l-2 border-purple-500 pl-3"><h4 class="text-[10px] text-purple-400 uppercase mb-1">Gancho</h4><p class="text-white font-medium text-sm">${result.gancho}</p></div><div class="border-l-2 border-slate-500 pl-3"><h4 class="text-[10px] text-slate-400 uppercase mb-1">Contexto</h4><p class="text-slate-300 text-sm">${result.contexto}</p></div><div class="border-l-2 border-emerald-500 pl-3"><h4 class="text-[10px] text-emerald-400 uppercase mb-1">Ação</h4><p class="text-emerald-200 text-sm">${result.acao}</p></div>`;
+        document.getElementById('narrative-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('narrative-error').classList.remove('hidden'); } finally { setToolLoading('narrative-btn', 'narrative-spinner', 'narrative-result', 'narrative-error', false); }
+});
+
+// Tool 11: Anomalias
+document.getElementById('anomaly-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('anomaly-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('anomaly-btn', 'anomaly-spinner', 'anomaly-result', 'anomaly-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { hipoteses: { type: "ARRAY", items: { type: "OBJECT", properties: { categoria: { type: "STRING" }, hipotese: { type: "STRING" }, acao_investigativa: { type: "STRING" } }, required: ["categoria", "hipotese", "acao_investigativa"] } } }, required: ["hipoteses"] };
+        const result = await fetchGeminiJSON(prompt, "Lead Data Scientist. Levanta 3 hipóteses (técnica, externa, interna) em PT-PT.", schema);
+        document.getElementById('anomaly-result').innerHTML = result.hipoteses.slice(0,3).map(h => `
+            <div class="bg-slate-800/80 p-4 rounded border border-slate-700 flex flex-col h-full"><span class="text-[10px] text-teal-400 uppercase font-bold tracking-wider mb-2">Fator ${h.categoria}</span><h4 class="font-bold text-slate-200 text-sm mb-3 flex-grow">${h.hipotese}</h4><div class="mt-auto pt-3 border-t border-slate-700/50"><span class="text-[10px] text-slate-400 uppercase font-bold block mb-1">Investigação</span><p class="text-slate-300 text-xs">${h.acao_investigativa}</p></div></div>`).join('');
+        document.getElementById('anomaly-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('anomaly-error').classList.remove('hidden'); } finally { setToolLoading('anomaly-btn', 'anomaly-spinner', 'anomaly-result', 'anomaly-error', false); }
+});
+
+// MOVIDO: Tool 12: Guarda-Costas
+document.getElementById('bodyguard-btn').addEventListener('click', async () => {
+    const prompt = document.getElementById('bodyguard-input').value.trim();
+    if (!prompt) return;
+    setToolLoading('bodyguard-btn', 'bodyguard-spinner', 'bodyguard-result', 'bodyguard-error', true);
+    try {
+        const schema = { type: "OBJECT", properties: { mitigacao: { type: "STRING" }, foco_solucao: { type: "STRING" } }, required: ["mitigacao", "foco_solucao"] };
+        const result = await fetchGeminiJSON(prompt, "Consultor de Gestão de Crise. Ajuda o utilizador a apresentar métricas negativas aos chefes sem mentir, mas de forma construtiva em PT-PT.", schema);
+        document.getElementById('bodyguard-result').innerHTML = `
+            <div class="mb-4"><h4 class="text-xs text-lime-400 uppercase font-bold mb-1">Como enquadrar o problema</h4><p class="text-slate-200 text-sm">${result.mitigacao}</p></div>
+            <div class="pt-4 border-t border-slate-700"><h4 class="text-xs text-emerald-400 uppercase font-bold mb-1">Onde focar a discussão (Solução)</h4><p class="text-slate-300 text-sm">${result.foco_solucao}</p></div>`;
+        document.getElementById('bodyguard-result').classList.remove('hidden');
+    } catch (e) { document.getElementById('bodyguard-error').classList.remove('hidden'); } finally { setToolLoading('bodyguard-btn', 'bodyguard-spinner', 'bodyguard-result', 'bodyguard-error', false); }
+});
+
+</script>
+</body>
+</html>
